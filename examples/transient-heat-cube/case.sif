@@ -1,0 +1,78 @@
+Header
+  CHECK KEYWORDS Warn
+  Mesh DB "." "elmer_mesh"
+End
+
+Simulation
+  Max Output Level = 5
+  Coordinate System = Cartesian 3D
+  Coordinate Mapping(3) = 1 2 3
+  Simulation Type = Transient
+  Timestepping Method = BDF
+  BDF Order = 1
+  Timestep Intervals = 20
+  Timestep Sizes = 1
+  Output Intervals = 1
+  Solver Input File = case.sif
+  Output File = case.result
+End
+
+Body 1
+  Name = "solid"
+  Target Bodies(1) = 1
+  Equation = 1
+  Material = 1
+  Initial Condition = 1
+End
+
+Equation 1
+  Name = "Transient Heat Equation"
+  Active Solvers(2) = 1 2
+End
+
+Solver 1
+  Exec Solver = Always
+  Equation = Heat Equation
+  Procedure = "HeatSolve" "HeatSolver"
+  Variable = Temperature
+  Variable DOFs = 1
+  Linear System Solver = Direct
+  Linear System Direct Method = UMFPack
+  Linear System Abort Not Converged = Logical True
+  Nonlinear System Convergence Tolerance = 1.0e-10
+End
+
+Solver 2
+  Exec Solver = After Timestep
+  Equation = "Result Output"
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Output File Name = "../../results/transient_heat"
+  Vtu Format = Logical True
+  Binary Output = Logical False
+  Single Precision = Logical False
+  Save Geometry Ids = Logical True
+  Show Variables = Logical True
+End
+
+Material 1
+  Name = "Stainless Steel 304 Smoke"
+  Heat Conductivity = 15
+  Density = 8000
+  Heat Capacity = 500
+End
+
+Initial Condition 1
+  Name = "Initial Temperature"
+  Temperature = Real 300
+End
+
+Boundary Condition 1
+  Name = "x_min"
+  Target Boundaries(1) = 1
+  Temperature = Real 400
+End
+Boundary Condition 2
+  Name = "x_max"
+  Target Boundaries(1) = 2
+  Temperature = Real 300
+End

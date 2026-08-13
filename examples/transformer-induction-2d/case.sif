@@ -1,0 +1,158 @@
+Header
+  CHECK KEYWORDS Warn
+  Mesh DB "." "elmer_mesh"
+End
+
+Simulation
+  Max Output Level = 5
+  Coordinate System = Cartesian 2D
+  Simulation Type = Steady State
+  Steady State Max Iterations = 1
+  Output Intervals = 1
+  Angular Frequency = 314.159265358979
+  Solver Input File = case.sif
+  Output File = case.result
+End
+
+Constants
+  Permeability of Vacuum = 1.25663706212e-6
+  Permittivity of Vacuum = 8.8541878128e-12
+End
+
+Body 1
+  Name = "air"
+  Target Bodies(1) = 1
+  Equation = 1
+  Material = 1
+End
+Body 2
+  Name = "core"
+  Target Bodies(1) = 2
+  Equation = 1
+  Material = 2
+End
+Body 3
+  Name = "primary_pos"
+  Target Bodies(1) = 3
+  Equation = 1
+  Material = 3
+  Body Force = 1
+End
+Body 4
+  Name = "primary_neg"
+  Target Bodies(1) = 4
+  Equation = 1
+  Material = 4
+  Body Force = 2
+End
+Body 5
+  Name = "secondary_pos"
+  Target Bodies(1) = 5
+  Equation = 1
+  Material = 5
+End
+Body 6
+  Name = "secondary_neg"
+  Target Bodies(1) = 6
+  Equation = 1
+  Material = 6
+End
+
+Equation 1
+  Name = "Harmonic Magnetodynamics 2D"
+  Active Solvers(3) = 1 2 3
+End
+
+Solver 1
+  Exec Solver = Always
+  Equation = "Mag"
+  Variable = A[A re:1 A im:1]
+  Procedure = "MagnetoDynamics2D" "MagnetoDynamics2DHarmonic"
+  Linear System Complex = Logical True
+  Linear System Solver = Direct
+  Linear System Direct Method = UMFPack
+  Linear System Abort Not Converged = Logical True
+  Steady State Convergence Tolerance = 1.0e-8
+End
+
+Solver 2
+  Exec Solver = Always
+  Equation = "ComputeB"
+  Variable = -nooutput temp
+  Exported Variable 1 = B[B re:2 B im:2]
+  Target Variable = "A"
+  Target Variable Complex = Logical True
+  Procedure = "MagnetoDynamics2D" "BSolver"
+  Discontinuous Galerkin = Logical True
+  Average Within Materials = Logical True
+  Calculate Joule Heating = Logical False
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BiCGStab
+  Linear System Max Iterations = 500
+  Linear System Convergence Tolerance = 1.0e-8
+  Linear System Preconditioning = ILU0
+End
+
+Solver 3
+  Exec Solver = After Timestep
+  Equation = "Result Output"
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Output File Name = "../../results/baseline"
+  Vtu Format = Logical True
+  Binary Output = Logical False
+  Single Precision = Logical False
+  Save Geometry Ids = Logical True
+  Discontinuous Galerkin = Logical True
+  Show Variables = Logical True
+End
+
+Material 1
+  Name = "NonconductingStrandedRegion"
+  Relative Permeability = 1
+  Electric Conductivity = 0
+End
+Material 2
+  Name = "LinearLaminatedCore"
+  Relative Permeability = 1000
+  Electric Conductivity = 0
+End
+Material 3
+  Name = "NonconductingStrandedRegion"
+  Relative Permeability = 1
+  Electric Conductivity = 0
+End
+Material 4
+  Name = "NonconductingStrandedRegion"
+  Relative Permeability = 1
+  Electric Conductivity = 0
+End
+Material 5
+  Name = "NonconductingStrandedRegion"
+  Relative Permeability = 1
+  Electric Conductivity = 0
+End
+Material 6
+  Name = "NonconductingStrandedRegion"
+  Relative Permeability = 1
+  Electric Conductivity = 0
+End
+
+Body Force 1
+  Name = "primary_pos_current"
+  Current Density = Real 666666.666667
+  Current Density Im = Real 0
+  Calculate Potential = Logical True
+End
+Body Force 2
+  Name = "primary_neg_current"
+  Current Density = Real -666666.666667
+  Current Density Im = Real 0
+  Calculate Potential = Logical True
+End
+
+Boundary Condition 1
+  Name = "outer_boundary"
+  Target Boundaries(1) = 1
+  A re = Real 0
+  A im = Real 0
+End
